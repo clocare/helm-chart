@@ -1,0 +1,35 @@
+app:
+    image: sarah9898/clocare
+    affinity: true
+    replicas: 1
+mysql:
+    affinity: &dbAffinity
+        podAntiAffinity:
+        requiredDuringSchedulingIgnoredDuringExecution:
+        - labelSelector:
+            matchExpressions:
+            - key: app
+              operator: In
+              values:
+              - db
+            topologyKey: "kubernetes.io/hostname"
+    auth:
+      database: forge
+      username: forge
+      password: ""
+      replicationUser: repl_user
+      replicationPassword: repl_password
+    architecture: standalone #or replication
+    primary:
+        persistence:
+          enabled: false
+        podLabels:
+            app: db
+        << : *dbAffinity
+    secondary:
+        persistence:
+          enabled: false
+        replicaCount: 1
+        podLabels:
+            app: db
+        << : *dbAffinity
